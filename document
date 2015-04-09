@@ -1,1 +1,9 @@
 OPENAPI 
+
+[COURSE]
+
+URL: ./api/courses
+type: "GET"
+
+
+URL: ./api/courses/:id	[Detail]

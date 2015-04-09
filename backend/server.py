@@ -14,7 +14,12 @@ import pg
 class IndexHandler(RequestHandler):
     @reqenv
     def get(self):
-        self.finish(json.dumps({'version': 0.1}))
+        self.finish(json.dumps({'version': 0.1, 'method': 'GET'}))
+        return
+    
+    @reqenv
+    def post(self):
+        self.finish(json.dumps({'version': 0.1, 'method': 'POST'}))
         return
 
 
@@ -24,7 +29,7 @@ if __name__ == '__main__':
     db = pg.AsyncPG(config.DBNAME,config.DBUSER,config.DBPASSWORD,dbtz='+8')
     app = tornado.web.Application([
         ('/apis/', IndexHandler),
-        ],cookie_secret = 'cookie',autoescape = 'xhtml_escape')
+        ],cookie_secret = config.COOKIES,autoescape = 'xhtml_escape')
     srv = tornado.httpserver.HTTPServer(app)
     srv.add_sockets(httpsock)
     tornado.ioloop.IOLoop.instance().start()
