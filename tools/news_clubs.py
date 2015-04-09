@@ -41,12 +41,14 @@ class News:
         self.index = str(year) + str(month) + str(idx)
         url += self.index
         self.page = urllib.request.urlopen(url)
-        self.soup = BeautifulSoup(self.page.read())
+        tmp = self.page.read().decode('big5')
+        print(tmp)
+        self.soup = BeautifulSoup(tmp)
         self.title = None
         self.user = None
         self.department = None
         self.phone = None
-        self.type = None
+        #self._type = None
         self.category = None
         self.target = None
         self.start = None
@@ -58,7 +60,7 @@ class News:
 
     def parse(self):
         b = self.soup.find(id="BulletinDtl")
-        self.type = b.img['alt']
+        #self.type = b.img['alt']
         table = b.table.find_all('tr')
         self.title = table[1].string
         provider = table[2].string.split('：')[1]
@@ -83,9 +85,9 @@ class News:
         return self.index
 
     def print(self):
-        print(self.index, self.type, self.title, len(self.content))
+        print(self.index, self.title, len(self.content))
 
-#n = News(2015, 4, 10)
-#n.print()
-c = Clubs(1)
-c.print()
+n = News(2015, 4, 10)
+n.print()
+#c = Clubs(1)
+#c.print()
