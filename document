@@ -1,9 +1,40 @@
 OPENAPI 
 
-[COURSE]
+[COURSES]
 
 URL: ./api/courses
 type: "GET"
 
 
-URL: ./api/courses/:id	[Detail]
+URL: ./api/courses/:id/	[Detail]
+
+[MAIL]
+
+URL: ./api/mail/
+RETURN: all dorm
+
+URL: ./api/mail/:dormid/		[Detail]
+RETURN: {
+    'dormid': dormid,
+    'dormname': dormname,
+    'content': [{
+        'id': id,
+        'name': name,
+        'date': date,
+        'type': type,
+        'exist': exist
+    }]
+}
+
+[CLUB]
+
+URL: ./api/club/:page/
+RETURN: {
+    'page': page,
+    'content': [{
+        'title': title,
+        'club': club,
+        'start': start,
+        'end': end
+    }]
+}

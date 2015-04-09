@@ -9,6 +9,11 @@ from req import RequestHandler
 import config
 import json
 
+from mail import MailService
+from mail import MailHandler
+from club import ClubService
+from club import ClubHandler
+
 import pg
 
 class IndexHandler(RequestHandler):
@@ -28,8 +33,14 @@ if __name__ == '__main__':
     tornado.process.fork_processes(config.PROCESSES)
     db = pg.AsyncPG(config.DBNAME,config.DBUSER,config.DBPASSWORD,dbtz='+8')
     app = tornado.web.Application([
-        ('/apis/', IndexHandler),
+        ('/api/', IndexHandler),
+        ('/api/dorm/', MailHandler),
+        ('/api/dorm/(\d+)/', MailHandler),
+        ('/api/club/', ClubHandler),
+        ('/api/club/(\d+)/', ClubHandler),
         ],cookie_secret = config.COOKIES,autoescape = 'xhtml_escape')
     srv = tornado.httpserver.HTTPServer(app)
     srv.add_sockets(httpsock)
+    Service.Mail = MailService(db)
+    Service.Club = ClubService(db)
     tornado.ioloop.IOLoop.instance().start()
