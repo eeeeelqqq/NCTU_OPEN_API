@@ -34,8 +34,8 @@ if __name__ == '__main__':
     db = pg.AsyncPG(config.DBNAME,config.DBUSER,config.DBPASSWORD,dbtz='+8')
     app = tornado.web.Application([
         ('/api/', IndexHandler),
-        ('/api/dorm/', MailHandler),
-        ('/api/dorm/(\d+)/', MailHandler),
+        ('/api/mail/', MailHandler),
+        ('/api/mail/(\d+)/', MailHandler),
         ('/api/club/', ClubHandler),
         ('/api/club/(\d+)/', ClubHandler),
         ],cookie_secret = config.COOKIES,autoescape = 'xhtml_escape')

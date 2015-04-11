@@ -5,36 +5,59 @@ OPENAPI
 URL: ./api/courses
 type: "GET"
 
+data:
+	option:
+		real_id			int
+		ch_name			varchar
+		eng_name		varchar
+		departmentid	int
+		teacher_id		int
 
-URL: ./api/courses/:id/	[Detail]
 
 [MAIL]
 
-URL: ./api/mail/
-RETURN: all dorm
+URL: ./api/mail/		//redefine it
+type: "GET"
+RETURN: all mail
 
-URL: ./api/mail/:dormid/		[Detail]
-RETURN: {
-    'dormid': dormid,
-    'dormname': dormname,
-    'content': [{
-        'id': id,
-        'name': name,
-        'date': date,
-        'type': type,
-        'exist': exist
-    }]
-}
+URL: ./api/mail/:departmentid/		[Detail]
+type: "GET"
+
+data:
+	option:
+		name 	varchar //收信人
+		date 	{start, end}	datetime yyyy/mm/dd //查詢起訖時間
+		type 	int
+
+	RETURN:
+		[{
+			id: int
+			departmentid: int
+			name: varchar
+			date: datetime yyyy/mm/dd
+			type: int
+			exist: bool
+		}]
+
+	type enum()
+
+[DORM]
+URL: ./api/dorm/
 
 [CLUB]
 
-URL: ./api/club/:page/
-RETURN: {
-    'page': page,
-    'content': [{
-        'title': title,
-        'club': club,
-        'start': start,
-        'end': end
-    }]
-}
+URL: ./api/club/
+
+data:
+	option:
+	
+
+	RETURN: 
+		[{
+			'id': id,
+			'title': title,
+			'club': club,
+			'start': start,
+			'end': end
+		}]
+
