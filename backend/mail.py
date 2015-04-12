@@ -16,7 +16,7 @@ class MailService:
         self.mapping = {'092': '十三舍', '094': '女二舍', '087': '八舍', '088': '九舍', '095': '研二舍', '093': '竹軒', '091': '十二舍', '086': '七舍', '090': '十一舍', '089': '十舍'}
         self.expire = {}
         for i in self.mapping:
-            self.expire[i] = time.time()
+            self.expire[i] = 0
         self.formatdata = ['id', 'name', 'date', 'type']
         MailService.inst = self
 
