@@ -62,7 +62,9 @@ class MailService:
             return cur.fetchone()[0]
         return cur.fetchone()[0] 
 
-    def get_mail_by_department(self, department, departmentid):
+
+
+    def get_mail_by_department(self, department, departmentid, filt):
         departmentname = self.mapping[department]
         cur = yield self.db.cursor()
         if time.time() - self.expire[department] > self.expire_time:
@@ -80,14 +82,14 @@ class MailService:
                             (c['id'], departmentid, c['name'], date, _type, True))
             self.expire[department] = time.time()
         yield cur.execute('SELECT "id", "name", "date", "type", "exist" FROM "department_mail" '
-                'WHERE "departmentid" = %s;', (departmentid,))
+                'WHERE "departmentid" = %s ' + filt[0] + ';', (departmentid,) + filt[1])
         res = []
         for (_id, name, date, _type, exist) in cur:
             res.append({'id': _id,
                 'departmentid': departmentid,
                 'departmentname': departmentname,
                 'name': name,
-                'date': date.strftime('%Y/%M/%d'),
+                'date': date.strftime('%Y/%m/%d'),
                 'type': _type,
                 'exist': exist})
         return res
@@ -109,20 +111,43 @@ class MailService:
             return cur.fetchone()[0]
 
 
-    def get_mail(self, department=None):
+    def get_mail(self, department, filt):
+        def gen_filter(filt):
+            def cat_string(a, b):
+                if a != '':
+                    return a + ' AND ' + b
+                else:
+                    return ' AND ' + b
+            query = ''
+            args = ()
+            if filt['type']:
+                query = cat_string(query, ' "type" = %s ')
+                args = args + (filt['type'],)
+            if filt['start']:
+                query = cat_string(query, ' "date" >= %s ')
+                args = args + (filt['start'],)
+            if filt['end']:
+                query = cat_string(query, ' "date" <= %s ')
+                args = args + (filt['end'],)
+            if filt['name']:
+                query = cat_string(query, ' "name" LIKE %s ')
+                args = args + (('%%%s%%'% filt['name']),)
+            return (query, args)
+        filt = gen_filter(filt)
+        print(filt)
         cur = yield self.db.cursor()
         if department:
             departmentid = department
             department = yield from self.get_department_id(department)
             if department == -1:
                 return []
-            res = yield from self.get_mail_by_department(department, departmentid)
+            res = yield from self.get_mail_by_department(department, departmentid, filt)
             return res
         else:
             res = []
             for department in self.mapping:
                 departmentid = yield from self.get_department(department)
-                tmp = yield from self.get_mail_by_department(department, departmentid)
+                tmp = yield from self.get_mail_by_department(department, departmentid, filt)
                 res.extend(tmp)
             return res
 
@@ -130,7 +155,16 @@ class MailService:
 class MailHandler(RequestHandler):
     @reqenv
     def get(self, department=None):
-        res = yield from MailService.inst.get_mail(department)
+        name = self.get_argument('name', default=None)
+        start = self.get_argument('start', default=None)
+        end = self.get_argument('end', default=None)
+        _type = self.get_argument('type', default=None)
+        filt = {'name': name,
+                'start': start,
+                'end': end,
+                'type': _type}
+        res = yield from MailService.inst.get_mail(department, filt)
+        print(res)
         self.finish(json.dumps(res))
         return
 
