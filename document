@@ -61,3 +61,17 @@ data:
 			'end': end
 		}]
 
+[STUDENTID]
+
+URL: ./api/studentid/
+
+data:
+	option:
+		id		varchar //學號(支援部分搜索)
+		name 	varchar //姓名(支援部分搜索)
+
+	RETURN:
+		[{
+			'id': varchar,
+			'name': varchar
+		}]

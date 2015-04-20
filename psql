@@ -39,3 +39,12 @@ CREATE TABLE department_mail(
 
 
 CREATE TRIGGER department_mail_modified BEFORE UPDATE ON department_mail FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
+
+CREATE TABLE student_id(
+	id varchar(256) UNIQUE,
+	name varchar(256),
+	created timestamp DEFAULT now(),
+	modified timestamp DEFAULT now()
+);
+
+CREATE TRIGGER student_id_modified BEFORE UPDATE ON student_id FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();

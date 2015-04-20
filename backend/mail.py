@@ -68,19 +68,24 @@ class MailService:
         departmentname = self.mapping[department]
         cur = yield self.db.cursor()
         if time.time() - self.expire[department] > self.expire_time:
-            res = self.parse_mail_by_department(department)
-            content = res['content']
-            for c in content:
-                yield cur.execute('SELECT "id" from "department_mail"'
-                        ' WHERE "id" = %s;', (c['id'],))
-                if cur.rowcount != 1:
-                    date = c['date'].replace('/', '-')
-                    _type = yield from self.get_mail_type(c['type'])
-                    yield cur.execute('INSERT INTO "department_mail" '
-                            '("id", "departmentid", "name", "date", "type", "exist") '
-                            'VALUES(%s, %s, %s, %s, %s, %s);', 
-                            (c['id'], departmentid, c['name'], date, _type, True))
-            self.expire[department] = time.time()
+            try:
+                res = self.parse_mail_by_department(department)
+                content = res['content']
+                yield cur.execute('UPDATE "department_mail" SET "exist" = %s WHERE "departmentid" = %s;', (True, departmentid))
+                for c in content:
+                    yield cur.execute('UPDATE "department_mail" SET "exist" = %s WHERE "id" = %s;', (True, c['id']))
+                    yield cur.execute('SELECT "id" from "department_mail"'
+                            ' WHERE "id" = %s;', (c['id'],))
+                    if cur.rowcount != 1:
+                        date = c['date'].replace('/', '-')
+                        _type = yield from self.get_mail_type(c['type'])
+                        yield cur.execute('INSERT INTO "department_mail" '
+                                '("id", "departmentid", "name", "date", "type", "exist") '
+                                'VALUES(%s, %s, %s, %s, %s, %s);', 
+                                (c['id'], departmentid, c['name'], date, _type, True))
+                self.expire[department] = time.time()
+            except:
+                pass
         yield cur.execute('SELECT "id", "name", "date", "type", "exist" FROM "department_mail" '
                 'WHERE "departmentid" = %s ' + filt[0] + ';', (departmentid,) + filt[1])
         res = []
@@ -134,7 +139,6 @@ class MailService:
                 args = args + (('%%%s%%'% filt['name']),)
             return (query, args)
         filt = gen_filter(filt)
-        print(filt)
         cur = yield self.db.cursor()
         if department:
             departmentid = department
@@ -164,8 +168,7 @@ class MailHandler(RequestHandler):
                 'end': end,
                 'type': _type}
         res = yield from MailService.inst.get_mail(department, filt)
-        print(res)
-        self.finish(json.dumps(res))
+        self.finish(json.dumps(res, ensure_ascii=False).encode('utf-8'))
         return
 
 if __name__ == '__main__':

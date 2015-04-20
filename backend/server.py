@@ -13,6 +13,8 @@ from mail import MailService
 from mail import MailHandler
 from club import ClubService
 from club import ClubHandler
+from studentid import StudentidHandler
+from studentid import StudentidService
 
 import pg
 
@@ -38,9 +40,11 @@ if __name__ == '__main__':
         ('/api/mail/(\d+)/', MailHandler),
         ('/api/club/', ClubHandler),
         ('/api/club/(\d+)/', ClubHandler),
+        ('/api/studentid/', StudentidHandler),
         ],cookie_secret = config.COOKIES,autoescape = 'xhtml_escape')
     srv = tornado.httpserver.HTTPServer(app)
     srv.add_sockets(httpsock)
     Service.Mail = MailService(db)
     Service.Club = ClubService(db)
+    Service.Studenid = StudentidService(db)
     tornado.ioloop.IOLoop.instance().start()
